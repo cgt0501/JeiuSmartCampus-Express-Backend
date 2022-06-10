@@ -38,21 +38,22 @@ let main_notice = () => {
                     const name = $(td).find('.name').first().text().trim();
                     const writeday = $(td).find('.writeday').first().text().trim();
                     const number =  $(td).find('.Number').first().text().trim();
+                    const code = path.substring(12, 17);
                     let tag = '';
                     let color = '';
 
                     if (title.includes('장학')) {
                         tag = '장학';
-                        color = 'background: ' + '#FF3F14';
+                        color = 'background: ' + '#FF3B30';
                     }else if (title.includes('학사') || title.includes('입학')) {
                         tag = '학사';
-                        color = 'background: ' + '#F2B705';
+                        color = 'background: ' + '#FFCC00';
                     }else if (title.includes('공고') || title.includes('코로나') || title.includes('교내')) {
                         tag = '교내';
-                        color = 'background: ' + '#67C904';
+                        color = 'background: ' + '#34C759';
                     }else{
                         tag = '기타';
-                        color = 'background: ' + '#a4a4a4';
+                        color = 'background: ' + '#FF9500';
                     }
 
                     result.push({
@@ -61,11 +62,12 @@ let main_notice = () => {
                         name,
                         writeday,
                         number,
+                        code,
                         tag,
                         color
                     })
                 });
-                const removed = result.splice(0, 5);
+                const removed = result.splice(2, 5);
 
                 app.get("/board", (req, res) => {
                     res.send(removed);
@@ -102,23 +104,23 @@ let big_size_notice = () => {
                     const name = $(td).find('.name').first().text().trim();
                     const writeday = $(td).find('.writeday').first().text().trim();
                     const number =  $(td).find('.Number').first().text().trim();
+                    const code = path.substring(12, 17);
                     let tag = '';
                     let color = '';
 
-                    if (title.includes('장학')){
+                    if (title.includes('장학')) {
                         tag = '장학';
-                        color = 'background: ' + '#FF3F14';
+                        color = 'background: ' + '#FF3B30';
                     }else if (title.includes('학사') || title.includes('입학')) {
                         tag = '학사';
-                        color = 'background: ' + '#F2B705';
+                        color = 'background: ' + '#FFCC00';
                     }else if (title.includes('공고') || title.includes('코로나') || title.includes('교내')) {
                         tag = '교내';
-                        color = 'background: ' + '#67C904';
+                        color = 'background: ' + '#34C759';
                     }else{
                         tag = '기타';
-                        color = 'background: ' + '#a4a4a4';
+                        color = 'background: ' + '#FF9500';
                     }
-                    console.log(path);
 
                     result.push({
                         url,
@@ -126,6 +128,7 @@ let big_size_notice = () => {
                         name,
                         writeday,
                         number,
+                        code,
                         tag,
                         color
                     })
@@ -138,7 +141,7 @@ let big_size_notice = () => {
         }
     )
 }
-
+/*
 let noticeContent = () => {
 
     request(
@@ -173,11 +176,131 @@ let noticeContent = () => {
             }
         }
     )
-}
+} */
+
+app.get('/con/:page', function (req, res) {
+    const params = req.params;
+    console.log(params);
+
+    request(
+        {
+            url: "https://jeiu.ac.kr/board/view.asp?sn=" + params.page + "&page=1&search=&SearchString=&BoardID=00001",
+            method: "GET",
+            encoding: null,
+        },
+        (error, response, body) => {
+            if (response.statusCode === 200) {
+                console.log("세부페이지 배포 성공");
+
+                //iconv를 사용하여 body를 EUC-KR로 디코드
+                const bodyDecoded = iconv.decode(body, "euc-kr");
+                //디코드 해서 저장
+                const $ = cheerio.load(bodyDecoded);
+                mainurl = 'https://jeiu.ac.kr'
+
+                const data = [{
+                    title: $('#content > div.b_view > div.v_top > div.v_title').text(),
+                    date: $('#content > div.b_view > div.v_top > div.v_info > span:nth-child(2)').text(),
+                    view: $('#content > div.b_view > div.v_top > div.v_info > span:nth-child(3)').text(),
+                    fileName: $('#content > div.b_view > div.v_top > div.v_file > div > a').text(),
+                    fileLink: mainurl + $('#content > div.b_view > div.v_top > div.v_file > div > a').attr('href'),
+                    contents: $('#content > div.b_view > div.v_con').find('*').text().trim(),
+                    img: mainurl +"/"+ $('#content > div.b_view > div.v_con > p > img').attr('src')
+                }]
+
+                app.get("/" + params.page +"/notice", (req, res) => {
+                    res.send(data);
+                });
+
+                res.redirect("http://localhost:3000/"+ params.page +"/notice");
+            }
+        }
+    )
+
+
+});
+
+app.get('/all_board/:page', function (req, res) {
+    const params = req.params;
+    console.log(params);
+
+    request(
+        {
+            url: "https://jeiu.ac.kr/board/list.asp?Page=" + params.page + "&search=&SearchString=&BoardID=00001",
+            method: "GET",
+            encoding: null,
+        },
+        (error, response, body) => {
+            if (response.statusCode === 200) {
+                console.log('1페이지 게시판 연동 성공');
+
+                //iconv를 사용하여 body를 EUC-KR로 디코드
+                const bodyDecoded = iconv.decode(body, "euc-kr");
+                //디코드 해서 저장
+                const $ = cheerio.load(bodyDecoded);
+
+                const title = $('#content > table > tbody > tr').toArray();
+                const result = [];
+
+                title.forEach((td) => {
+                    const aFirst = $(td).find("a").first(); //첫번째 <a> 태그
+                    const path = aFirst.attr("href");
+                    const url = `https://jeiu.ac.kr/board/${path}`
+                    const title = aFirst.text().trim();
+                    const name = $(td).find('.name').first().text().trim();
+                    const writeday = $(td).find('.writeday').first().text().trim();
+                    const number =  $(td).find('.Number').first().text().trim();
+                    const code = path.substring(12, 17);
+                    let tag = '';
+                    let color = '';
+
+                    if (title.includes('장학')) {
+                        tag = '장학';
+                        color = 'background: ' + '#FF3B30';
+                    }else if (title.includes('학사') || title.includes('입학')) {
+                        tag = '학사';
+                        color = 'background: ' + '#FFCC00';
+                    }else if (title.includes('공고') || title.includes('코로나') || title.includes('교내')) {
+                        tag = '교내';
+                        color = 'background: ' + '#34C759';
+                    }else{
+                        tag = '기타';
+                        color = 'background: ' + '#FF9500';
+                    }
+
+                    result.push({
+                        url,
+                        title,
+                        name,
+                        writeday,
+                        number,
+                        code,
+                        tag,
+                        color
+                    })
+                });
+
+                app.get("/all_board/" + params.page +"/board", (req, res) => {
+                    res.send(result);
+                });
+
+                res.redirect("http://localhost:3000/all_board/"+ params.page +"/board");
+            }
+        }
+    )
+
+});
+
+
+
+
 
 main_notice()
 big_size_notice()
-noticeContent()
+
+
+
+
 
 
 
