@@ -20,7 +20,7 @@ let main_notice = () => {
         },
         (error, response, body) => {
             if (response.statusCode === 200) {
-                console.log('게시판 연동 성공 (5)');
+                console.log('메인화면용 게시판 목록 연동 완료 \n');
 
                 //iconv를 사용하여 body를 EUC-KR로 디코드
                 const bodyDecoded = iconv.decode(body, "euc-kr");
@@ -86,7 +86,7 @@ let big_size_notice = () => {
         },
         (error, response, body) => {
             if (response.statusCode === 200) {
-                console.log('1페이지 게시판 연동 성공');
+                console.log('게시글 첫번째 목록 연동 완료 \n');
 
                 //iconv를 사용하여 body를 EUC-KR로 디코드
                 const bodyDecoded = iconv.decode(body, "euc-kr");
@@ -180,7 +180,7 @@ let noticeContent = () => {
 
 app.get('/con/:page', function (req, res) {
     const params = req.params;
-    console.log(params);
+    console.log("페이지 연동 요청: "+ params.page + "번 게시글");
 
     request(
         {
@@ -190,7 +190,7 @@ app.get('/con/:page', function (req, res) {
         },
         (error, response, body) => {
             if (response.statusCode === 200) {
-                console.log("세부페이지 배포 성공");
+                console.log("세부페이지 배포 성공: " + params.page + "번 게시글 \n");
 
                 //iconv를 사용하여 body를 EUC-KR로 디코드
                 const bodyDecoded = iconv.decode(body, "euc-kr");
@@ -205,7 +205,7 @@ app.get('/con/:page', function (req, res) {
                     fileName: $('#content > div.b_view > div.v_top > div.v_file > div > a').text(),
                     fileLink: mainurl + $('#content > div.b_view > div.v_top > div.v_file > div > a').attr('href'),
                     contents: $('#content > div.b_view > div.v_con').find('*').text().trim(),
-                    img: mainurl +"/"+ $('#content > div.b_view > div.v_con > p > img').attr('src')
+                    img: mainurl + $('#content > div.b_view > div.v_con').find('img').attr('src')
                 }]
 
                 app.get("/" + params.page +"/notice", (req, res) => {
@@ -222,7 +222,7 @@ app.get('/con/:page', function (req, res) {
 
 app.get('/all_board/:page', function (req, res) {
     const params = req.params;
-    console.log(params);
+    console.log("페이지 연동 요청: " + params.page + " 페이지");
 
     request(
         {
@@ -232,7 +232,7 @@ app.get('/all_board/:page', function (req, res) {
         },
         (error, response, body) => {
             if (response.statusCode === 200) {
-                console.log('1페이지 게시판 연동 성공');
+                console.log(params.page + ' 페이지 게시판 연동 성공 \n');
 
                 //iconv를 사용하여 body를 EUC-KR로 디코드
                 const bodyDecoded = iconv.decode(body, "euc-kr");
