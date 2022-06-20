@@ -4,12 +4,17 @@ const iconv = require("iconv-lite");
 //express 모듈 불러오기
 const express = require("express");
 const cors = require('cors');
+const os = require("os");
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(cors());
+
+const networkInterfaces = os.networkInterfaces();
+
+const ip = networkInterfaces['en0'][1]['address'];
 
 let main_notice = () => {
     request(
@@ -212,7 +217,7 @@ app.get('/con/:page', function (req, res) {
                     res.send(data);
                 });
 
-                res.redirect("http://localhost:3000/"+ params.page +"/notice");
+                res.redirect("/" + params.page + "/notice");
             }
         }
     )
@@ -284,7 +289,7 @@ app.get('/all_board/:page', function (req, res) {
                     res.send(result);
                 });
 
-                res.redirect("http://localhost:3000/all_board/"+ params.page +"/board");
+                res.redirect("/all_board/"+ params.page +"/board");
             }
         }
     )
@@ -302,6 +307,6 @@ big_size_notice()
 
 
 
+app.listen(3000, (ip) => {});
 
-
-app.listen(3000, () => {});
+console.log("\n Now Host: " + ip + ":3000\n")
