@@ -5,6 +5,13 @@ const iconv = require("iconv-lite");
 const express = require("express");
 const cors = require('cors');
 const os = require("os");
+const mysql = require('mysql');
+const connection = mysql.createConnection({
+    host     : 'localhost',
+    user     : 'root',
+    password : '1q2w3e4r!',
+    database : 'jeiue_campus'
+});
 
 const app = express();
 app.use(express.json());
@@ -15,6 +22,14 @@ app.use(cors());
 const networkInterfaces = os.networkInterfaces();
 
 const ip = networkInterfaces['en0'][1]['address'];
+
+const scholarship = [
+    "테스트"
+];
+
+let test = "테스트";
+console.log(test.indexOf(scholarship));
+
 
 let main_notice = () => {
     request(
@@ -183,6 +198,7 @@ let noticeContent = () => {
     )
 } */
 
+// 페이지 연동 요청
 app.get('/con/:page', function (req, res) {
     const params = req.params;
     console.log("페이지 연동 요청: "+ params.page + "번 게시글");
@@ -209,7 +225,7 @@ app.get('/con/:page', function (req, res) {
                     view: $('#content > div.b_view > div.v_top > div.v_info > span:nth-child(3)').text(),
                     fileName: $('#content > div.b_view > div.v_top > div.v_file > div > a').text(),
                     fileLink: mainurl + $('#content > div.b_view > div.v_top > div.v_file > div > a').attr('href'),
-                    contents: $('#content > div.b_view > div.v_con').find('*').text().trim(),
+                    contents: $('#content > div.b_view > div.v_con > p').find('*').text().trim(),
                     img: mainurl + $('#content > div.b_view > div.v_con').find('img').attr('src')
                 }]
 
@@ -262,7 +278,7 @@ app.get('/all_board/:page', function (req, res) {
                     if (title.includes('장학')) {
                         tag = '장학';
                         color = 'background: ' + '#FF3B30';
-                    }else if (title.includes('학사') || title.includes('입학')) {
+                    }else if (title.includes('학사') || title.includes('입학') || title.includes('수강') || title.includes('전과') || title.includes('재입학')) {
                         tag = '학사';
                         color = 'background: ' + '#FFCC00';
                     }else if (title.includes('공고') || title.includes('코로나') || title.includes('교내')) {
@@ -296,17 +312,31 @@ app.get('/all_board/:page', function (req, res) {
 
 });
 
+connection.connect();
+
+// mysql에서 정보 불러오기
+app.get('/proflie', function (req, res) {
+    console.log("프로필 정보 불러오기");
 
 
+    connection.query('SELECT * from Users WHERE id=?', [1],(error, result) => {
+        if (error) throw error;
+        const data = [{
+            id: result[0].id,
+            author: result[0].author
+        }]
 
+        res.send((data))
+    });
+
+
+});
 
 main_notice()
 big_size_notice()
 
 
 
-
-
-app.listen(3000, (ip) => {});
+app.listen(3000, ip, () => {});
 
 console.log("\n Now Host: " + ip + ":3000\n")
