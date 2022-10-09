@@ -282,6 +282,7 @@ connection.connect();
 // mysql에서 정보 불러오기
 
 //샘플 프로필 정보 불러오기
+//사용 안함
 app.get('/proflie', function (req, res) {
     console.log("\n 프로필 정보 불러오기");
 
@@ -319,6 +320,7 @@ app.post('/post/signup', function (req, res, next) {
     connection.query('INSERT INTO Users VALUES(null, ?, ?, ?, ?, ?)', [name, password, department, rank, stu_num], (error, result) => {
         if (error) throw error;
         res.send((result))
+        console.log(name + "의 회원가입을 받았습니다.")
     });
 });
 
@@ -364,59 +366,51 @@ app.post('/post/login', function (req, res, next) {
     });
 });
 
-//샘플 프로필 정보 불러오기
-app.get('/proflie', function (req, res) {
-    console.log("\n 프로필 정보 불러오기");
+// 사용자 리스트
+app.get('/profile_list', function (req, res) {
+    console.log("\n 사용자 리스트 불러오기");
 
-    connection.query('SELECT * from Users WHERE id=?', [1],(error, result) => {
+    connection.query('SELECT * from Users',(error, result) => {
         if (error) throw error;
-        const data = [{
-            id: result[0].id,
-            name: result[0].name,
-            department: result[0].department,
-            stu_rank: result[0].stu_rank,
-            stu_number: result[0].stu_number
-        }]
-
-        res.send((data))
+        res.send((result))
     });
 });
 
 
-    app.get('/banner', function (req, res) {
-        axios({
-            // 크롤링을 원하는 페이지 URL
-            url: 'https://www.jeiu.ac.kr/front_2022.asp',
-            method: 'GET',
-            responseType: 'arraybuffer',
-        })
-            // 성공했을 경우
-            .then(response => {
-                // 만약 content가 정상적으로 출력되지 않는다면, arraybuffer 타입으로 되어있기 때문일 수 있다.
-                // 현재는 string으로 반환되지만, 만약 다르게 출력된다면 뒤에 .toString() 메서드를 호출하면 된다.
-                const content = iconv.decode(response.data, 'EUC-KR');
-                const $ = cheerio.load(content);
-                const img = $('#m_jei_slider > div:nth-child(1) > a > img').attr('src');
-                const bg_link = "https://www.jeiu.ac.kr" + img
-                let ori_data = []
-                ori_data.push({
-                    bg_link
-                })
-
-                res.send(ori_data)
-                console.log("배너를 불러왔습니다.");
-            })
-            // 실패했을 경우
-            .catch(err => {
-                console.error(err);
-            });
+app.get('/banner', function (req, res) {
+    axios({
+        // 크롤링을 원하는 페이지 URL
+        url: 'https://www.jeiu.ac.kr/front_2022.asp',
+        method: 'GET',
+        responseType: 'arraybuffer',
     })
+        // 성공했을 경우
+        .then(response => {
+            // 만약 content가 정상적으로 출력되지 않는다면, arraybuffer 타입으로 되어있기 때문일 수 있다.
+            // 현재는 string으로 반환되지만, 만약 다르게 출력된다면 뒤에 .toString() 메서드를 호출하면 된다.
+            const content = iconv.decode(response.data, 'EUC-KR');
+            const $ = cheerio.load(content);
+            const img = $('#m_jei_slider > div:nth-child(1) > a > img').attr('src');
+            const bg_link = "https://www.jeiu.ac.kr" + img
+            let ori_data = []
+            ori_data.push({
+                bg_link
+            })
 
-    main_notice()
-    big_size_notice()
+            res.send(ori_data)
+            console.log("배너를 불러왔습니다.");
+        })
+        // 실패했을 경우
+        .catch(err => {
+            console.error(err);
+        });
+})
+
+main_notice()
+big_size_notice()
 
 
-    app.listen(3000, ip, () => {
-    });
+app.listen(3000, ip, () => {
+});
 
-    console.log("\n Now Host: " + ip + ":3000\n")
+console.log("\n Now Host: " + ip + ":3000\n")
