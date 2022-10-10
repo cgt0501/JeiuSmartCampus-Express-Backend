@@ -329,51 +329,87 @@ app.post('/post/login', function (req, res, next) {
     console.log("로그인을 요청하였습니다.")
     const stu_num = req.body.stu_num;
     const password = req.body.password;
-    connection.query('select * from Users where stu_number=?', [stu_num], function (error, result){
-        //존재하지 않는 학번 출력
-        if(!result[0]) {
-            res.send({
-                code: 1,
-                massage: "존재하지 않는 학번입니다."
-            })
-        } else {
-            // 패스워드가 맞았을때
-            if(password === result[0].password){
+
+    if (stu_num === "" && password === "") {
+        res.send({
+            code: 0,
+            massage: "테스트."
+        })
+    } else {
+
+        connection.query('select * from Users where stu_number=?', [stu_num], function (error, result) {
+            //존재하지 않는 학번 출력
+            if (!result[0]) {
                 res.send({
-                    // 사용자 정보를 JSON으로 전송
-                    id: result[0].id,
-                    name: result[0].name,
-                    password: result[0].password,
-                    department: result[0].department,
-                    stu_rank: result[0].stu_rank,
-                    stu_number: result[0].stu_number,
-                    code: 3
+                    code: 1,
+                    massage: "존재하지 않는 학번입니다."
                 })
             } else {
+                // 패스워드가 맞았을때
+                if (password === result[0].password) {
+                    res.send({
+                        // 사용자 정보를 JSON으로 전송
+                        id: result[0].id,
+                        name: result[0].name,
+                        password: result[0].password,
+                        department: result[0].department,
+                        stu_rank: result[0].stu_rank,
+                        stu_number: result[0].stu_number,
+                        code: 3
+                    })
+                } else {
+                    res.send({
+                        massage: "비밀번호를 확인해주세요",
+                        code: 2
+                    })
+                }
+            }
+
+            //에러 발생
+            if (error) {
                 res.send({
-                    massage: "비밀번호를 확인해주세요",
-                    code: 2
+                    massage: "알 수 없는 오류가 발생했습니다. " + error
                 })
             }
-        }
 
-        //에러 발생
-        if(error) {
-            res.send({
-                massage: "알 수 없는 오류가 발생했습니다. " + error
-            })
-        }
-    });
+        });
+    }
 });
 
 // 사용자 리스트
 app.get('/profile_list', function (req, res) {
     console.log("\n 사용자 리스트 불러오기");
 
-    connection.query('SELECT * from Users',(error, result) => {
+    connection.query('SELECT * from Users', (error, result) => {
         if (error) throw error;
         res.send((result))
     });
+});
+
+// 테스트 유저 정보 삭제
+app.post('/post/profile_delete', function (req, res) {
+    const id = req.body.id;
+
+    console.log('프로필 삭제');
+    connection.query('DELETE FROM Users WHERE id=?', [id], (error, result) => {
+        if (error) throw error;
+        res.send(result)
+    })
+});
+
+// 유저 정보 수정
+app.post('/post/profile_update', function (req, res) {
+    const id = req.body.id;
+    const name = req.body.name;
+    const password = req.body.password;
+    const department = req.body.department;
+    const rank = req.body.rank;
+
+    console.log('프로필 수정');
+    connection.query('UPDATE Users SET name = ?, password = ?, department = ?, stu_rank = ?  WHERE id = ?', [name, password, department, rank, id], (error, result) => {
+        if (error) throw error;
+        res.send(result)
+    })
 });
 
 
