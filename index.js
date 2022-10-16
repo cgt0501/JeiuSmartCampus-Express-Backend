@@ -281,6 +281,8 @@ app.get('/all_board/:page', function (req, res) {
 /////////
 // mysql에서 정보 불러오기
 connection.connect();
+//현재 시간
+let nowTime = Date.now().toString()
 
 // storage 설정
 const profile = multer.diskStorage({
@@ -288,7 +290,7 @@ const profile = multer.diskStorage({
         cb(null, 'profile_img/') // cb 콜백함수를 통해 전송된 파일 저장 디렉토리 설정
     },
     filename: (req, file, cb) => {
-        cb(null, file.originalname) // cb 콜백함수를 통해 전송된 파일 이름 설정
+        cb(null, nowTime + '-' + file.originalname) // cb 콜백함수를 통해 전송된 파일 이름 설정
     }
 })
 const profile_upload = multer({storage: profile})
