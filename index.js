@@ -9,13 +9,14 @@ const os = require("os");
 const mysql = require('mysql');
 const response = require("express");
 const bodyParser = require("body-parser");
-
+//파일 업로드용
+var multer = require('multer');
 
 const connection = mysql.createConnection({
-    host     : 'localhost',
-    user     : 'root',
-    password : '1q2w3e4r!',
-    database : 'jeiue_campus'
+    host: 'localhost',
+    user: 'root',
+    password: '1q2w3e4r!',
+    database: 'jeiue_campus'
 });
 
 const app = express();
@@ -275,56 +276,45 @@ app.get('/all_board/:page', function (req, res) {
 
 });
 
+//////////
 //SQL 부분
-
+/////////
+// mysql에서 정보 불러오기
 connection.connect();
 
-// mysql에서 정보 불러오기
+// storage 설정
+const profile = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'profile_img/') // cb 콜백함수를 통해 전송된 파일 저장 디렉토리 설정
+    },
+    filename: (req, file, cb) => {
+        cb(null, file.originalname) // cb 콜백함수를 통해 전송된 파일 이름 설정
+    }
+})
+const profile_upload = multer({storage: profile})
+//프로필 이미지 확인 가능하게 해주는 메소드
+app.use('/profile_img', express.static('profile_img'));
 
-//샘플 프로필 정보 불러오기
-//사용 안함
-app.get('/proflie', function (req, res) {
-    console.log("\n 프로필 정보 불러오기");
-
-    connection.query('SELECT * from Users WHERE id=?', [22],(error, result) => {
-        if (error) throw error;
-        const data = [{
-            id: result[0].id,
-            name: result[0].name,
-            department: result[0].department,
-            stu_rank: result[0].stu_rank,
-            stu_number: result[0].stu_number
-        }]
-
-        res.send((data))
-    });
-});
-
-app.get('/', (req, res) => {
-    res.send(`
-  <form action="/post/login" method="post">
-    <input type="text" name="stu_num">
-    <input type="text" name="password">
-    <input type="submit">
-  </form>
-  `);
-});
-
-// 회원가입 받기
-app.post('/post/signup', function (req, res, next) {
+////////////
+// 회원가입 받기 Create
+///////////
+app.post('/post/signup', profile_upload.single('profile_img'), function (req, res, next) {
     const name = req.body.name;
     const stu_num = req.body.stu_num;
     const password = req.body.password;
     const department = req.body.department;
     const rank = req.body.rank;
-    connection.query('INSERT INTO Users VALUES(null, ?, ?, ?, ?, ?)', [name, password, department, rank, stu_num], (error, result) => {
+    const img = req.file['filename']
+    console.log(name, stu_num, password, department, rank, img);
+    connection.query('INSERT INTO Users VALUES(null, ?, ?, ?, ?, ?, ?)', [name, password, department, rank, stu_num, img], (error, result) => {
         if (error) throw error;
         res.send((result))
         console.log(name + "의 회원가입을 받았습니다.")
     });
 });
-
-// 로그인 확인하기
+/////////////
+// 로그인 확인하기 Read
+/////////////
 app.post('/post/login', function (req, res, next) {
     console.log("로그인을 요청하였습니다.")
     const stu_num = req.body.stu_num;
@@ -355,7 +345,8 @@ app.post('/post/login', function (req, res, next) {
                         department: result[0].department,
                         stu_rank: result[0].stu_rank,
                         stu_number: result[0].stu_number,
-                        code: 3
+                        code: 3,
+                        img: result[0].img
                     })
                 } else {
                     res.send({
@@ -375,18 +366,9 @@ app.post('/post/login', function (req, res, next) {
         });
     }
 });
-
-// 사용자 리스트
-app.get('/profile_list', function (req, res) {
-    console.log("\n 사용자 리스트 불러오기");
-
-    connection.query('SELECT * from Users', (error, result) => {
-        if (error) throw error;
-        res.send((result))
-    });
-});
-
-// 테스트 유저 정보 삭제
+/////////////
+// 유저 정보 삭제 Delete
+/////////////
 app.post('/post/profile_delete', function (req, res) {
     const id = req.body.id;
 
@@ -396,22 +378,34 @@ app.post('/post/profile_delete', function (req, res) {
         res.send(result)
     })
 });
-
-// 유저 정보 수정
-app.post('/post/profile_update', function (req, res) {
+/////////////
+// 유저 정보 수정 Update
+/////////////
+app.post('/post/profile_update', profile_upload.single('profile_img'), function (req, res) {
     const id = req.body.id;
     const name = req.body.name;
     const password = req.body.password;
     const department = req.body.department;
     const rank = req.body.rank;
-
+    const img = req.file['filename']
+    console.log(id, name, password, department, rank, img)
     console.log('프로필 수정');
-    connection.query('UPDATE Users SET name = ?, password = ?, department = ?, stu_rank = ?  WHERE id = ?', [name, password, department, rank, id], (error, result) => {
+    connection.query('UPDATE Users SET name = ?, password = ?, department = ?, stu_rank = ?, img = ?  WHERE id = ?', [name, password, department, rank, img, id], (error, result) => {
         if (error) throw error;
         res.send(result)
     })
 });
+////////////
+// 사용자 리스트
+////////////
+app.get('/profile_list', function (req, res) {
+    console.log("\n 사용자 리스트 불러오기");
 
+    connection.query('SELECT * from Users', (error, result) => {
+        if (error) throw error;
+        res.send((result))
+    });
+});
 
 app.get('/banner', function (req, res) {
     axios({
