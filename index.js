@@ -293,7 +293,18 @@ const profile = multer.diskStorage({
         cb(null, nowTime + '-' + file.originalname) // cb 콜백함수를 통해 전송된 파일 이름 설정
     }
 })
-const profile_upload = multer({storage: profile})
+
+//FileFilter 설정
+const fileFilter = (req, file, cb) => {
+    // mime type 체크하여 원하는 타입만 필터링
+    if (file === "") {
+        cb(null, false);
+    } else {
+        cb(null, true);
+    }
+}
+const profile_upload = multer({storage: profile, fileFilter})
+
 //프로필 이미지 확인 가능하게 해주는 메소드
 app.use('/profile_img', express.static('profile_img'));
 
@@ -306,7 +317,14 @@ app.post('/post/signup', profile_upload.single('profile_img'), function (req, re
     const password = req.body.password;
     const department = req.body.department;
     const rank = req.body.rank;
-    const img = req.file['filename']
+    let img = ""
+    //파일이 비어있을때
+    if (req.file === undefined) {
+        img = "";
+    } else {
+        //파일이 있을때
+        img = req.file['filename'];
+    }
     console.log(name, stu_num, password, department, rank, img);
     connection.query('INSERT INTO Users VALUES(null, ?, ?, ?, ?, ?, ?)', [name, password, department, rank, stu_num, img], (error, result) => {
         if (error) throw error;
@@ -383,16 +401,37 @@ app.post('/post/profile_delete', function (req, res) {
 /////////////
 // 유저 정보 수정 Update
 /////////////
-app.post('/post/profile_update', profile_upload.single('profile_img'), function (req, res) {
+app.post('/post/profile_update', function (req, res) {
     const id = req.body.id;
     const name = req.body.name;
     const password = req.body.password;
     const department = req.body.department;
     const rank = req.body.rank;
-    const img = req.file['filename']
-    console.log(id, name, password, department, rank, img)
+
+    console.log(id, name, password, department, rank)
     console.log('프로필 수정');
-    connection.query('UPDATE Users SET name = ?, password = ?, department = ?, stu_rank = ?, img = ?  WHERE id = ?', [name, password, department, rank, img, id], (error, result) => {
+    connection.query('UPDATE Users SET name = ?, password = ?, department = ?, stu_rank = ?  WHERE id = ?', [name, password, department, rank, id], (error, result) => {
+        if (error) throw error;
+        res.send(result)
+    })
+});
+/////////////
+// 유저 프로필 수정 Update
+/////////////
+app.post('/post/profile_img_update', profile_upload.single('profile_img'), function (req, res) {
+    const id = req.body.id;
+    let img = "";
+
+    //파일이 비어있을때
+    if (req.file === undefined) {
+        img = "";
+    } else {
+        img = req.file['filename'];
+    }
+
+    console.log(id, img)
+    console.log('프로필 수정');
+    connection.query('UPDATE Users SET img = ?  WHERE id = ?', [img, id], (error, result) => {
         if (error) throw error;
         res.send(result)
     })
@@ -418,8 +457,6 @@ app.get('/banner', function (req, res) {
     })
         // 성공했을 경우
         .then(response => {
-            // 만약 content가 정상적으로 출력되지 않는다면, arraybuffer 타입으로 되어있기 때문일 수 있다.
-            // 현재는 string으로 반환되지만, 만약 다르게 출력된다면 뒤에 .toString() 메서드를 호출하면 된다.
             const content = iconv.decode(response.data, 'EUC-KR');
             const $ = cheerio.load(content);
             const img = $('#m_jei_slider > div:nth-child(1) > a > img').attr('src');
