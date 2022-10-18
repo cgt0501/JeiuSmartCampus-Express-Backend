@@ -19,9 +19,14 @@ const connection = mysql.createConnection({
 
 const app = express();
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({extended: true}));
 
-app.use(cors());
+let corsOption = {
+    origin: 'http://192.168.0.6:8080',
+    credentials: true
+}
+
+app.use(cors(corsOption));
 
 let main_notice = () => {
     request(
@@ -450,7 +455,7 @@ big_size_notice()
 ////////////
 //사용할 IP설정
 ////////////
-const ip = "172.16.0.100"
+const ip = "192.168.0.6"
 
 app.listen(3000, ip, () => {
 });
