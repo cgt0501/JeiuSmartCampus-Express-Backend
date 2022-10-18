@@ -5,9 +5,7 @@ const iconv = require("iconv-lite");
 //express 모듈 불러오기
 const express = require("express");
 const cors = require('cors');
-const os = require("os");
 const mysql = require('mysql');
-const response = require("express");
 const bodyParser = require("body-parser");
 //파일 업로드용
 var multer = require('multer');
@@ -25,10 +23,6 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(cors());
 
-const networkInterfaces = os.networkInterfaces();
-
-const ip = networkInterfaces['en0'][1]['address'];
-
 let main_notice = () => {
     request(
         {
@@ -38,7 +32,7 @@ let main_notice = () => {
         },
         (error, response, body) => {
             if (response.statusCode === 200) {
-                console.log('메인화면용 게시판 목록 연동 완료 \n');
+                console.log('[request] 알림: 메인화면용 게시판 목록을 크롤링하였습니다.');
 
                 //iconv를 사용하여 body를 EUC-KR로 디코드
                 const bodyDecoded = iconv.decode(body, "euc-kr");
@@ -55,21 +49,21 @@ let main_notice = () => {
                     const title = aFirst.text().trim();
                     const name = $(td).find('.name').first().text().trim();
                     const writeday = $(td).find('.writeday').first().text().trim();
-                    const number =  $(td).find('.Number').first().text().trim();
+                    const number = $(td).find('.Number').first().text().trim();
                     const code = path.substring(12, 17);
-                    let tag = '';
-                    let color = '';
+                    let tag;
+                    let color;
 
                     if (title.includes('장학')) {
                         tag = '장학';
                         color = 'background: ' + '#FF3B30';
-                    }else if (title.includes('학사') || title.includes('입학')) {
+                    } else if (title.includes('학사') || title.includes('입학')) {
                         tag = '학사';
                         color = 'background: ' + '#FFCC00';
-                    }else if (title.includes('공고') || title.includes('코로나') || title.includes('교내')) {
+                    } else if (title.includes('공고') || title.includes('코로나') || title.includes('교내')) {
                         tag = '교내';
                         color = 'background: ' + '#34C759';
-                    }else{
+                    } else {
                         tag = '기타';
                         color = 'background: ' + '#FF9500';
                     }
@@ -104,7 +98,7 @@ let big_size_notice = () => {
         },
         (error, response, body) => {
             if (response.statusCode === 200) {
-                console.log('게시글 첫번째 목록 연동 완료 \n');
+                console.log('[request] 알림: 게시글 목록 첫 페이지를 크롤링하였습니다.');
 
                 //iconv를 사용하여 body를 EUC-KR로 디코드
                 const bodyDecoded = iconv.decode(body, "euc-kr");
@@ -121,21 +115,21 @@ let big_size_notice = () => {
                     const title = aFirst.text().trim();
                     const name = $(td).find('.name').first().text().trim();
                     const writeday = $(td).find('.writeday').first().text().trim();
-                    const number =  $(td).find('.Number').first().text().trim();
+                    const number = $(td).find('.Number').first().text().trim();
                     const code = path.substring(12, 17);
-                    let tag = '';
-                    let color = '';
+                    let tag;
+                    let color;
 
                     if (title.includes('장학')) {
                         tag = '장학';
                         color = 'background: ' + '#FF3B30';
-                    }else if (title.includes('학사') || title.includes('입학')) {
+                    } else if (title.includes('학사') || title.includes('입학')) {
                         tag = '학사';
                         color = 'background: ' + '#FFCC00';
-                    }else if (title.includes('공고') || title.includes('코로나') || title.includes('교내')) {
+                    } else if (title.includes('공고') || title.includes('코로나') || title.includes('교내')) {
                         tag = '교내';
                         color = 'background: ' + '#34C759';
-                    }else{
+                    } else {
                         tag = '기타';
                         color = 'background: ' + '#FF9500';
                     }
@@ -163,7 +157,6 @@ let big_size_notice = () => {
 // 페이지 연동 요청
 app.get('/con/:page', function (req, res) {
     const params = req.params;
-    console.log("페이지 연동 요청: "+ params.page + "번 게시글");
 
     request(
         {
@@ -173,7 +166,7 @@ app.get('/con/:page', function (req, res) {
         },
         (error, response, body) => {
             if (response.statusCode === 200) {
-                console.log("세부페이지 배포 성공: " + params.page + "번 게시글 \n");
+                console.log("[GET] 알림: " + params.page + "번 게시글을 Frontend에서 참조하였습니다.");
 
                 //iconv를 사용하여 body를 EUC-KR로 디코드
                 const bodyDecoded = iconv.decode(body, "euc-kr");
@@ -191,7 +184,7 @@ app.get('/con/:page', function (req, res) {
                     img: mainurl + $('#content > div.b_view > div.v_con').find('img').attr('src')
                 }]
 
-                app.get("/" + params.page +"/notice", (req, res) => {
+                app.get("/" + params.page + "/notice", (req, res) => {
                     res.send(data);
                 });
 
@@ -199,15 +192,13 @@ app.get('/con/:page', function (req, res) {
             }
         }
     )
-
-
+    console.log("[GET] 알림: " + params.page + "번 게시글을 크롤링하였습니다.");
 });
 
 app.use(bodyParser.urlencoded({extended: false}))
 
 app.get('/all_board/:page', function (req, res) {
     const params = req.params;
-    console.log("페이지 연동 요청: " + params.page + " 페이지");
 
     request(
         {
@@ -217,7 +208,7 @@ app.get('/all_board/:page', function (req, res) {
         },
         (error, response, body) => {
             if (response.statusCode === 200) {
-                console.log(params.page + ' 페이지 게시판 연동 성공 \n');
+                console.log("[GET] 알림: " + params.page + "번 게시판을 Frontend에서 참조하였습니다.");
 
                 //iconv를 사용하여 body를 EUC-KR로 디코드
                 const bodyDecoded = iconv.decode(body, "euc-kr");
@@ -234,21 +225,21 @@ app.get('/all_board/:page', function (req, res) {
                     const title = aFirst.text().trim();
                     const name = $(td).find('.name').first().text().trim();
                     const writeday = $(td).find('.writeday').first().text().trim();
-                    const number =  $(td).find('.Number').first().text().trim();
+                    const number = $(td).find('.Number').first().text().trim();
                     const code = path.substring(12, 17);
-                    let tag = '';
-                    let color = '';
+                    let tag;
+                    let color;
 
                     if (title.includes('장학')) {
                         tag = '장학';
                         color = 'background: ' + '#FF3B30';
-                    }else if (title.includes('학사') || title.includes('입학') || title.includes('수강') || title.includes('전과') || title.includes('재입학')) {
+                    } else if (title.includes('학사') || title.includes('입학') || title.includes('수강') || title.includes('전과') || title.includes('재입학')) {
                         tag = '학사';
                         color = 'background: ' + '#FFCC00';
-                    }else if (title.includes('공고') || title.includes('코로나') || title.includes('교내')) {
+                    } else if (title.includes('공고') || title.includes('코로나') || title.includes('교내')) {
                         tag = '교내';
                         color = 'background: ' + '#34C759';
-                    }else{
+                    } else {
                         tag = '기타';
                         color = 'background: ' + '#FF9500';
                     }
@@ -265,15 +256,15 @@ app.get('/all_board/:page', function (req, res) {
                     })
                 });
 
-                app.get("/all_board/" + params.page +"/board", (req, res) => {
+                app.get("/all_board/" + params.page + "/board", (req, res) => {
                     res.send(result);
                 });
 
-                res.redirect("/all_board/"+ params.page +"/board");
+                res.redirect("/all_board/" + params.page + "/board");
             }
         }
     )
-
+    console.log("[GET] 알림: " + params.page + "번 게시판을 크롤링하였습니다.");
 });
 
 //////////
@@ -311,13 +302,13 @@ app.use('/profile_img', express.static('profile_img'));
 ////////////
 // 회원가입 받기 Create
 ///////////
-app.post('/post/signup', profile_upload.single('profile_img'), function (req, res, next) {
+app.post('/post/signup', profile_upload.single('profile_img'), function (req, res) {
     const name = req.body.name;
     const stu_num = req.body.stu_num;
     const password = req.body.password;
     const department = req.body.department;
     const rank = req.body.rank;
-    let img = ""
+    let img;
     //파일이 비어있을때
     if (req.file === undefined) {
         img = "";
@@ -329,14 +320,13 @@ app.post('/post/signup', profile_upload.single('profile_img'), function (req, re
     connection.query('INSERT INTO Users VALUES(null, ?, ?, ?, ?, ?, ?)', [name, password, department, rank, stu_num, img], (error, result) => {
         if (error) throw error;
         res.send((result))
-        console.log(name + "의 회원가입을 받았습니다.")
+        console.log("[POST] 알림: " + department + ", " + name + "의 회원가입을 받았습니다.");
     });
 });
 /////////////
 // 로그인 확인하기 Read
 /////////////
-app.post('/post/login', function (req, res, next) {
-    console.log("로그인을 요청하였습니다.")
+app.post('/post/login', function (req, res) {
     const stu_num = req.body.stu_num;
     const password = req.body.password;
 
@@ -354,6 +344,7 @@ app.post('/post/login', function (req, res, next) {
                     code: 1,
                     massage: "존재하지 않는 학번입니다."
                 })
+                console.log("[POST] 알림: 로그인이 거부되었습니다.");
             } else {
                 // 패스워드가 맞았을때
                 if (password === result[0].password) {
@@ -368,11 +359,13 @@ app.post('/post/login', function (req, res, next) {
                         code: 3,
                         img: result[0].img
                     })
+                    console.log("[POST] 알림: " + stu_num + " 의 로그인 요청을 받았습니다.");
                 } else {
                     res.send({
                         massage: "비밀번호를 확인해주세요",
                         code: 2
                     })
+                    console.log("[POST] 알림: 로그인이 거부되었습니다.");
                 }
             }
 
@@ -392,11 +385,12 @@ app.post('/post/login', function (req, res, next) {
 app.post('/post/profile_delete', function (req, res) {
     const id = req.body.id;
 
-    console.log('프로필 삭제');
     connection.query('DELETE FROM Users WHERE id=?', [id], (error, result) => {
         if (error) throw error;
         res.send(result)
     })
+
+    console.log("[POST] 알림: " + id + " 의 계정을 삭제했습니다.");
 });
 /////////////
 // 유저 정보 수정 Update
@@ -408,44 +402,45 @@ app.post('/post/profile_update', function (req, res) {
     const department = req.body.department;
     const rank = req.body.rank;
 
-    console.log(id, name, password, department, rank)
-    console.log('프로필 수정');
     connection.query('UPDATE Users SET name = ?, password = ?, department = ?, stu_rank = ?  WHERE id = ?', [name, password, department, rank, id], (error, result) => {
         if (error) throw error;
         res.send(result)
     })
+
+    console.log("[POST] 알림: " + id + ', ' + name + " 의 계정을 수정했습니다.");
 });
 /////////////
-// 유저 프로필 수정 Update
+// 유저 프로필 사진 수정 Update
 /////////////
 app.post('/post/profile_img_update', profile_upload.single('profile_img'), function (req, res) {
     const id = req.body.id;
-    let img = "";
+    let img;
 
     //파일이 비어있을때
     if (req.file === undefined) {
         img = "";
+        console.log("[POST] 알림: " + id + "가 프로필 사진 변경을 요청하였으나, 아무런 파일이 없었습니다.");
     } else {
         img = req.file['filename'];
+        console.log("[POST] 알림: " + id + "의 프로필 사진을 변경하였습니다.");
     }
 
-    console.log(id, img)
-    console.log('프로필 수정');
     connection.query('UPDATE Users SET img = ?  WHERE id = ?', [img, id], (error, result) => {
         if (error) throw error;
         res.send(result)
     })
+
+
 });
 ////////////
 // 사용자 리스트
 ////////////
 app.get('/profile_list', function (req, res) {
-    console.log("\n 사용자 리스트 불러오기");
-
     connection.query('SELECT * from Users', (error, result) => {
         if (error) throw error;
         res.send((result))
     });
+    console.log("[GET] 알림: 전체 사용자의 리스트를 불러옵니다.");
 });
 
 app.get('/banner', function (req, res) {
@@ -474,12 +469,16 @@ app.get('/banner', function (req, res) {
             console.error(err);
         });
 })
-
 main_notice()
 big_size_notice()
 
 
+////////////
+//사용할 IP설정
+////////////
+const ip = "172.16.0.100"
+
 app.listen(3000, ip, () => {
 });
 
-console.log("\n Now Host: " + ip + ":3000\n")
+console.log("[SERVER] 알림: 서버에 " + ip + ":3000가 할당되었습니다.")
