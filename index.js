@@ -443,32 +443,6 @@ app.get('/profile_list', function (req, res) {
     console.log("[GET] 알림: 전체 사용자의 리스트를 불러옵니다.");
 });
 
-app.get('/banner', function (req, res) {
-    axios({
-        // 크롤링을 원하는 페이지 URL
-        url: 'https://www.jeiu.ac.kr/front_2022.asp',
-        method: 'GET',
-        responseType: 'arraybuffer',
-    })
-        // 성공했을 경우
-        .then(response => {
-            const content = iconv.decode(response.data, 'EUC-KR');
-            const $ = cheerio.load(content);
-            const img = $('#m_jei_slider > div:nth-child(1) > a > img').attr('src');
-            const bg_link = "https://www.jeiu.ac.kr" + img
-            let ori_data = []
-            ori_data.push({
-                bg_link
-            })
-
-            res.send(ori_data)
-            console.log("배너를 불러왔습니다.");
-        })
-        // 실패했을 경우
-        .catch(err => {
-            console.error(err);
-        });
-})
 main_notice()
 big_size_notice()
 
