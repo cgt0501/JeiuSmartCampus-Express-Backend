@@ -294,8 +294,9 @@ app.get('/all_board/:page', function (req, res) {
 connection.connect();
 
 // 사진 중복 방지를 위해 랜덤한 숫자 생성
-const randomOrigin = Math.random() * 100000000000
-const random = Math.floor(randomOrigin)
+function random() {
+    return Math.floor(Math.random() * 100000000000)
+}
 
 // storage 설정
 const profile = multer.diskStorage({
@@ -303,7 +304,7 @@ const profile = multer.diskStorage({
         cb(null, 'profile_img/') // cb 콜백함수를 통해 전송된 파일 저장 디렉토리 설정
     },
     filename: (req, file, cb) => {
-        cb(null, random + '-' + file.originalname) // cb 콜백함수를 통해 전송된 파일 이름 설정
+        cb(null, random() + '-' + file.originalname) // cb 콜백함수를 통해 전송된 파일 이름 설정
     }
 })
 
