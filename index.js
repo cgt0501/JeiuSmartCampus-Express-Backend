@@ -14,8 +14,8 @@ require("dotenv").config();
 
 const connection = mysql.createConnection({
     host: 'localhost',
-    user: 'root',
-    password: '1q2w3e4r!',
+    user: process.env.SQL_USER,
+    password: process.env.SQL_PASSWORD,
     database: 'jeiue_campus'
 });
 
@@ -29,8 +29,16 @@ app.use(express.urlencoded({extended: true}));
 ////////////
 const ip = process.env.MAIN_HOST
 
+const whitelist = ['http://localhost:8080', `http://${process.env.MAIN_HOST}:8080`, `http://${process.env.PUBLIC_HOST}:8080`]
+
 let corsOption = {
-    origin: `http://${ip}:8080`,
+    origin: (origin, callback) => {
+        if (whitelist.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error("허용된 Orign이 아님"))
+        }
+    },
     credentials: true
 }
 
@@ -285,8 +293,10 @@ app.get('/all_board/:page', function (req, res) {
 /////////
 // mysql에서 정보 불러오기
 connection.connect();
-//현재 시간
-let nowTime = Date.now().toString()
+
+// 사진 중복 방지를 위해 랜덤한 숫자 생성
+const randomOrigin = Math.random() * 100000000000
+const random = Math.floor(randomOrigin)
 
 // storage 설정
 const profile = multer.diskStorage({
@@ -294,7 +304,7 @@ const profile = multer.diskStorage({
         cb(null, 'profile_img/') // cb 콜백함수를 통해 전송된 파일 저장 디렉토리 설정
     },
     filename: (req, file, cb) => {
-        cb(null, nowTime + '-' + file.originalname) // cb 콜백함수를 통해 전송된 파일 이름 설정
+        cb(null, random + '-' + file.originalname) // cb 콜백함수를 통해 전송된 파일 이름 설정
     }
 })
 
@@ -463,4 +473,8 @@ big_size_notice()
 app.listen(3000, ip, () => {
 });
 
-console.log("[SERVER] 알림: 서버에 " + ip + ":3000가 할당되었습니다.")
+console.log("///////////////////////////////////////////////////////");
+console.log("// JEIUe SmartCampus Backend Server가 시작되었습니다.//");
+console.log("///////////////////////////////////////////////////////");
+console.log("[SERVER] 알림: 내부(메인) IP가 " + ip + ":3000로 할당되었습니다.");
+console.log("[SERVER] 알림: 외부(공개) IP가 " + process.env.PUBLIC_HOST + ":3000로 할당되었습니다.");
