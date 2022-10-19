@@ -417,6 +417,7 @@ app.post('/post/profile_update', function (req, res) {
     const department = req.body.department;
     const rank = req.body.rank;
 
+
     connection.query('UPDATE Users SET name = ?, password = ?, department = ?, stu_rank = ?  WHERE id = ?', [name, password, department, rank, id], (error, result) => {
         if (error) throw error;
         res.send(result)
