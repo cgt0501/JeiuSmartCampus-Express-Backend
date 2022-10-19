@@ -34,12 +34,10 @@ const whitelist = ['http://localhost:8080', `http://${process.env.MAIN_HOST}:808
 
 let corsOption = {
     origin: function (origin, callback) {
-        if (whitelist.indexOf(origin) !== -1) { // 만일 whitelist 배열에 origin인자가 있을 경우
-            callback(null, true); // cors 허용
-        } else {
-            callback(new Error("Not Allowed Origin!")); // cors 비허용
-        }
+        const isWhitelisted = whitelist.indexOf(origin) !== -1;
+        callback(null, isWhitelisted);
     },
+
     credentials: true
 }
 
@@ -354,13 +352,6 @@ app.post('/post/login', function (req, res) {
     const stu_num = req.body.stu_num;
     const password = req.body.password;
 
-    if (stu_num === "" && password === "") {
-        res.send({
-            code: 0,
-            massage: "테스트."
-        })
-    } else {
-
         connection.query('select * from Users where stu_number=?', [stu_num], function (error, result) {
             //존재하지 않는 학번 출력
             if (!result[0]) {
@@ -368,7 +359,7 @@ app.post('/post/login', function (req, res) {
                     code: 1,
                     massage: "존재하지 않는 학번입니다."
                 })
-                console.log("[POST] 알림: 로그인이 거부되었습니다.");
+                console.log("[POST] 알림: 존재하지 않는 학번으로 로그인을 시도하여 로그인이 거부되었습니다.");
             } else {
                 // 패스워드가 맞았을때
                 if (password === result[0].password) {
@@ -389,7 +380,7 @@ app.post('/post/login', function (req, res) {
                         massage: "비밀번호를 확인해주세요",
                         code: 2
                     })
-                    console.log("[POST] 알림: 로그인이 거부되었습니다.");
+                    console.log("[POST] 알림: 비밀번호가 일치하지 않아 로그인이 거부되었습니다.", password);
                 }
             }
 
@@ -401,7 +392,6 @@ app.post('/post/login', function (req, res) {
             }
 
         });
-    }
 });
 /////////////
 // 유저 정보 삭제 Delete
