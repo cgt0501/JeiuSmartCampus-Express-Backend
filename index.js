@@ -2,13 +2,15 @@ const request = require("request");
 const axios = require('axios');
 const cheerio = require("cheerio");
 const iconv = require("iconv-lite");
-//express 모듈 불러오기
+// express 모듈 불러오기
 const express = require("express");
 const cors = require('cors');
 const mysql = require('mysql');
 const bodyParser = require("body-parser");
-//파일 업로드용
+// 파일 업로드용
 var multer = require('multer');
+// 환경변수 관리
+require("dotenv").config();
 
 const connection = mysql.createConnection({
     host: 'localhost',
@@ -19,9 +21,20 @@ const connection = mysql.createConnection({
 
 const app = express();
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({extended: true}));
 
-app.use(cors());
+
+////////////
+//사용할 IP설정
+////////////
+const ip = process.env.MAIN_HOST
+
+let corsOption = {
+    origin: `http://${ip}:8080`,
+    credentials: true
+}
+
+app.use(cors(corsOption));
 
 let main_notice = () => {
     request(
@@ -446,11 +459,6 @@ app.get('/profile_list', function (req, res) {
 main_notice()
 big_size_notice()
 
-
-////////////
-//사용할 IP설정
-////////////
-const ip = "172.16.0.100"
 
 app.listen(3000, ip, () => {
 });
