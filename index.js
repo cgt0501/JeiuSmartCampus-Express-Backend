@@ -29,14 +29,15 @@ app.use(express.urlencoded({extended: true}));
 ////////////
 const ip = process.env.MAIN_HOST
 
+
 const whitelist = ['http://localhost:8080', `http://${process.env.MAIN_HOST}:8080`, `http://${process.env.PUBLIC_HOST}:8080`]
 
 let corsOption = {
-    origin: (origin, callback) => {
-        if (whitelist.indexOf(origin) !== -1) {
-            callback(null, true);
+    origin: function (origin, callback) {
+        if (whitelist.indexOf(origin) !== -1) { // 만일 whitelist 배열에 origin인자가 있을 경우
+            callback(null, true); // cors 허용
         } else {
-            callback(new Error("허용된 Orign이 아님"))
+            callback(new Error("Not Allowed Origin!")); // cors 비허용
         }
     },
     credentials: true
