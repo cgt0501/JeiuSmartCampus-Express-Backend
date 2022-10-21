@@ -20,23 +20,24 @@ USE
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `Users`
+-- Table structure for table `CampusBoard_Human`
 --
 
-DROP TABLE IF EXISTS `Users`;
+DROP TABLE IF EXISTS `CampusBoard_Human`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `Users`
+CREATE TABLE `CampusBoard_Human`
 (
-    `id`         int         NOT NULL AUTO_INCREMENT,
-    `name`       varchar(45)  DEFAULT NULL,
-    `password`   varchar(45)  DEFAULT NULL,
-    `department` varchar(45)  DEFAULT NULL,
-    `stu_rank`   varchar(10) NOT NULL,
-    `stu_number` int         NOT NULL,
-    `img`        varchar(255) DEFAULT NULL,
-    PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=62 DEFAULT CHARSET=utf8mb3;
+    `id`      int unsigned NOT NULL AUTO_INCREMENT,
+    `title`   varchar(45) NOT NULL,
+    `user`    varchar(45) NOT NULL,
+    `date`    varchar(45) NOT NULL,
+    `content` varchar(150) DEFAULT NULL,
+    `image`   varchar(45)  DEFAULT NULL,
+    `stu_id`  int         NOT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `id_UNIQUE` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -48,4 +49,4 @@ CREATE TABLE `Users`
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-10-21 12:44:54
+-- Dump completed on 2022-10-21 12:44:53
