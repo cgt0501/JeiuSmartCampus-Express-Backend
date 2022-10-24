@@ -29,16 +29,15 @@ app.use(express.urlencoded({extended: true}));
 ////////////
 const ip = process.env.MAIN_HOST
 
+
 const whitelist = ['http://localhost:8080', `http://${process.env.MAIN_HOST}:8080`, `http://${process.env.PUBLIC_HOST}:8080`]
 
 let corsOption = {
-    origin: (origin, callback) => {
-        if (whitelist.indexOf(origin) !== -1) {
-            callback(null, true);
-        } else {
-            callback(new Error("허용된 Orign이 아님"))
-        }
+    origin: function (origin, callback) {
+        const isWhitelisted = whitelist.indexOf(origin) !== -1;
+        callback(null, isWhitelisted);
     },
+
     credentials: true
 }
 
@@ -175,6 +174,10 @@ let big_size_notice = () => {
     )
 }
 
+app.get('/', function (req, res) {
+    res.send("재능e 스마트캠퍼스 백엔드 서버입니다.")
+});
+
 // 페이지 연동 요청
 app.get('/con/:page', function (req, res) {
     const params = req.params;
@@ -295,8 +298,9 @@ app.get('/all_board/:page', function (req, res) {
 connection.connect();
 
 // 사진 중복 방지를 위해 랜덤한 숫자 생성
-const randomOrigin = Math.random() * 100000000000
-const random = Math.floor(randomOrigin)
+function random() {
+    return Math.floor(Math.random() * 100000000000)
+}
 
 // storage 설정
 const profile = multer.diskStorage({
@@ -304,7 +308,7 @@ const profile = multer.diskStorage({
         cb(null, 'profile_img/') // cb 콜백함수를 통해 전송된 파일 저장 디렉토리 설정
     },
     filename: (req, file, cb) => {
-        cb(null, random + '-' + file.originalname) // cb 콜백함수를 통해 전송된 파일 이름 설정
+        cb(null, random() + '-' + file.originalname) // cb 콜백함수를 통해 전송된 파일 이름 설정
     }
 })
 
@@ -318,9 +322,6 @@ const fileFilter = (req, file, cb) => {
     }
 }
 const profile_upload = multer({storage: profile, fileFilter})
-
-//프로필 이미지 확인 가능하게 해주는 메소드
-app.use('/profile_img', express.static('profile_img'));
 
 ////////////
 // 회원가입 받기 Create
@@ -353,22 +354,17 @@ app.post('/post/login', function (req, res) {
     const stu_num = req.body.stu_num;
     const password = req.body.password;
 
-    if (stu_num === "" && password === "") {
-        res.send({
-            code: 0,
-            massage: "테스트."
-        })
-    } else {
+    app.use('/profile_img', express.static('profile_img'));
 
-        connection.query('select * from Users where stu_number=?', [stu_num], function (error, result) {
-            //존재하지 않는 학번 출력
-            if (!result[0]) {
-                res.send({
-                    code: 1,
-                    massage: "존재하지 않는 학번입니다."
-                })
-                console.log("[POST] 알림: 로그인이 거부되었습니다.");
-            } else {
+    connection.query('select * from Users where stu_number=?', [stu_num], function (error, result) {
+        //존재하지 않는 학번 출력
+        if (!result[0]) {
+            res.send({
+                code: 1,
+                massage: "존재하지 않는 학번입니다."
+            })
+            console.log("[POST] 알림: 존재하지 않는 학번으로 로그인을 시도하여 로그인이 거부되었습니다.");
+        } else {
                 // 패스워드가 맞았을때
                 if (password === result[0].password) {
                     res.send({
@@ -388,10 +384,9 @@ app.post('/post/login', function (req, res) {
                         massage: "비밀번호를 확인해주세요",
                         code: 2
                     })
-                    console.log("[POST] 알림: 로그인이 거부되었습니다.");
+                    console.log("[POST] 알림: 비밀번호가 일치하지 않아 로그인이 거부되었습니다.", password);
                 }
             }
-
             //에러 발생
             if (error) {
                 res.send({
@@ -400,7 +395,6 @@ app.post('/post/login', function (req, res) {
             }
 
         });
-    }
 });
 /////////////
 // 유저 정보 삭제 Delete
@@ -424,6 +418,7 @@ app.post('/post/profile_update', function (req, res) {
     const password = req.body.password;
     const department = req.body.department;
     const rank = req.body.rank;
+
 
     connection.query('UPDATE Users SET name = ?, password = ?, department = ?, stu_rank = ?  WHERE id = ?', [name, password, department, rank, id], (error, result) => {
         if (error) throw error;
@@ -452,8 +447,6 @@ app.post('/post/profile_img_update', profile_upload.single('profile_img'), funct
         if (error) throw error;
         res.send(result)
     })
-
-
 });
 ////////////
 // 사용자 리스트
@@ -464,6 +457,108 @@ app.get('/profile_list', function (req, res) {
         res.send((result))
     });
     console.log("[GET] 알림: 전체 사용자의 리스트를 불러옵니다.");
+});
+
+// storage 설정
+const community = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'community_img/') // cb 콜백함수를 통해 전송된 파일 저장 디렉토리 설정
+    },
+    filename: (req, file, cb) => {
+        cb(null, random() + '-' + file.originalname) // cb 콜백함수를 통해 전송된 파일 이름 설정
+    }
+})
+
+const community_upload = multer({storage: community, fileFilter})
+
+////////////
+// 커뮤니티에 글 작성하기 Create
+///////////
+app.post('/post/post_content', community_upload.single('community_image'), function (req, res) {
+    const table = req.body.table;
+    const stu_id = req.body.stu_id;
+    const title = req.body.title;
+    const user = req.body.user;
+    const date = req.body.date;
+    const content = req.body.content;
+
+    let img;
+    //파일이 비어있을때
+    if (req.file === undefined) {
+        img = "";
+    } else {
+        //파일이 있을때
+        img = req.file['filename'];
+    }
+    if (table === "CampusBoard_AI") {
+        connection.query('INSERT INTO CampusBoard_AI VALUES(null, ?, ?, ?, ?, ?, ?)', [title, user, date, content, img, stu_id], (error, result) => {
+            if (error) throw error;
+            res.send((result))
+            console.log("[POST] 알림: " + table + "에 " + stu_id + " " + user + "이 " + title + " 게시물을 등록하였습니다.");
+        });
+    } else if (table === "CampusBoard_Art") {
+        connection.query('INSERT INTO CampusBoard_Art VALUES(null, ?, ?, ?, ?, ?, ?)', [title, user, date, content, img, stu_id], (error, result) => {
+            if (error) throw error;
+            res.send((result))
+            console.log("[POST] 알림: " + table + "에 " + stu_id + " " + user + "이 " + title + " 게시물을 등록하였습니다.");
+        });
+    } else if (table === "CampusBoard_Founded") {
+        connection.query('INSERT INTO CampusBoard_Founded VALUES(null, ?, ?, ?, ?, ?, ?)', [title, user, date, content, img, stu_id], (error, result) => {
+            if (error) throw error;
+            res.send((result))
+            console.log("[POST] 알림: " + table + "에 " + stu_id + " " + user + "이 " + title + " 게시물을 등록하였습니다.");
+        });
+    } else if (table === "CampusBoard_Human") {
+        connection.query('INSERT INTO CampusBoard_Human VALUES(null, ?, ?, ?, ?, ?, ?)', [title, user, date, content, img, stu_id], (error, result) => {
+            if (error) throw error;
+            res.send((result))
+            console.log("[POST] 알림: " + table + "에 " + stu_id + " " + user + "이 " + title + " 게시물을 등록하였습니다.");
+        });
+    } else if (table === "CampusBoard_Nature") {
+        connection.query('INSERT INTO CampusBoard_Nature VALUES(null, ?, ?, ?, ?, ?, ?)', [title, user, date, content, img, stu_id], (error, result) => {
+            if (error) throw error;
+            res.send((result))
+            console.log("[POST] 알림: " + table + "에 " + stu_id + " " + user + "이 " + title + " 게시물을 등록하였습니다.");
+        });
+    }
+});
+/////////////
+// 게시글 확인하기 Read
+/////////////
+app.get('/get/content/:table', function (req, res) {
+    const table = req.params.table;
+    if (table === "CampusBoard_AI") {
+        connection.query('SELECT * from CampusBoard_AI', (error, result) => {
+            if (error) throw error;
+            res.send((result))
+        });
+        console.log("[POST] 알림: AI학부 게시판의 목록을 불러옵니다.");
+    } else if (table === "CampusBoard_Art") {
+        connection.query('SELECT * from CampusBoard_Art', (error, result) => {
+            if (error) throw error;
+            res.send((result))
+        });
+        console.log("[POST] 알림: 예술학부 게시판의 목록을 불러옵니다.");
+    } else if (table === "CampusBoard_Founded") {
+        connection.query('SELECT * from CampusBoard_Founded', (error, result) => {
+            if (error) throw error;
+            res.send((result))
+        });
+        console.log("[POST] 알림: 창업학부 게시판의 목록을 불러옵니다.");
+    } else if (table === "CampusBoard_Human") {
+        connection.query('SELECT * from CampusBoard_Human', (error, result) => {
+            if (error) throw error;
+            res.send((result))
+        });
+        console.log("[POST] 알림: 인문학부 게시판의 목록을 불러옵니다.");
+    } else if (table === "CampusBoard_Nature") {
+        connection.query('SELECT * from CampusBoard_Nature', (error, result) => {
+            if (error) throw error;
+            res.send((result))
+        });
+        console.log("[POST] 알림: 자연학부 게시판의 목록을 불러옵니다.");
+    }
+
 });
 
 main_notice()
