@@ -156,35 +156,30 @@ let update = (req, res) => {
         });
         console.log("[GET] 알림: AI학부 게시판의 " + id + " 게시글을 수정했습니다.");
     } else if (table === "CampusBoard_Art") {
-        connection.query('DELETE FROM CampusBoard_Art WHERE id=?', [id], (error, result) => {
+        connection.query('UPDATE CampusBoard_Art SET title = ?, content = ?  WHERE id = ?', [title, content, id], (error, result) => {
             if (error) throw error;
             res.send((result));
         });
-        console.log("[GET] 알림: 예술학부 게시판의 " + id + " 게시글을 삭제했습니다.");
+        console.log("[GET] 알림: 예술학부 게시판의 " + id + " 게시글을 수정했습니다.");
     } else if (table === "CampusBoard_Founded") {
-        connection.query('DELETE FROM CampusBoard_Founded WHERE id=?', [id], (error, result) => {
+        connection.query('UPDATE CampusBoard_Founded SET title = ?, content = ?  WHERE id = ?', [title, content, id], (error, result) => {
             if (error) throw error;
             res.send((result));
         });
-        console.log("[GET] 알림: 창업학부 게시판의 " + id + " 게시글을 삭제했습니다.");
+        console.log("[GET] 알림: 창업학부 게시판의 " + id + " 게시글을 수정했습니다.");
     } else if (table === "CampusBoard_Human") {
-        connection.query('DELETE FROM CampusBoard_Human WHERE id=?', [id], (error, result) => {
+        connection.query('UPDATE CampusBoard_Human SET title = ?, content = ?  WHERE id = ?', [title, content, id], (error, result) => {
             if (error) throw error;
             res.send((result));
         });
-        console.log("[GET] 알림: 인문학부 게시판의 " + id + " 게시글을 삭제했습니다.");
+        console.log("[GET] 알림: 인문학부 게시판의 " + id + " 게시글을 수정했습니다.");
     } else if (table === "CampusBoard_Nature") {
-        connection.query('DELETE FROM CampusBoard_Nature WHERE id=?', [id], (error, result) => {
+        connection.query('UPDATE CampusBoard_Nature SET title = ?, content = ?  WHERE id = ?', [title, content, id], (error, result) => {
             if (error) throw error;
             res.send((result));
         });
-        console.log("[GET] 알림: 자연학부 게시판의 " + id + " 게시글을 삭제했습니다.");
+        console.log("[GET] 알림: 자연학부 게시판의 " + id + " 게시글을 수정했습니다.");
     }
-
-    connection.query('UPDATE Users SET name = ?, password = ?, department = ?, stu_rank = ?  WHERE id = ?', [name, password, department, rank, id], (error, result) => {
-        if (error) throw error;
-        res.send(result)
-    })
 }
 // 게시글 삭제
 let contents_delete = (req, res) => {
