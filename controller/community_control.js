@@ -1,5 +1,4 @@
 const mysql = require('mysql');
-const express = require("express");
 require("dotenv").config();
 
 const connection = mysql.createConnection({
@@ -120,25 +119,69 @@ let read = (req, res) => {
     } else if (table === "CampusBoard_Art") {
         connection.query('SELECT * from CampusBoard_Art where id = ?', [id], (error, result) => {
             if (error) throw error;
-            res.send((result))
+            const data = [{
+                title: result[0].title,
+                date: result[0].date,
+                view: "",
+                fileName: "",
+                fileLink: "https://jeiu.ac.krundefined",
+                contents: result[0].content,
+                img: result[0].image,
+                user: result[0].user,
+                stu_id: result[0].stu_id
+            }];
+            res.send(data);
         });
         console.log("[GET] 알림: 예술학부 게시판의 " + id + " 게시글을 불러왔습니다.");
     } else if (table === "CampusBoard_Founded") {
         connection.query('SELECT * from CampusBoard_Founded where id = ?', [id], (error, result) => {
             if (error) throw error;
-            res.send((result))
+            const data = [{
+                title: result[0].title,
+                date: result[0].date,
+                view: "",
+                fileName: "",
+                fileLink: "https://jeiu.ac.krundefined",
+                contents: result[0].content,
+                img: result[0].image,
+                user: result[0].user,
+                stu_id: result[0].stu_id
+            }];
+            res.send(data);
         });
         console.log("[GET] 알림: 창업학부 게시판의 " + id + " 게시글을 불러왔습니다.");
     } else if (table === "CampusBoard_Human") {
         connection.query('SELECT * from CampusBoard_Human where id = ?', [id], (error, result) => {
             if (error) throw error;
-            res.send((result))
+            const data = [{
+                title: result[0].title,
+                date: result[0].date,
+                view: "",
+                fileName: "",
+                fileLink: "https://jeiu.ac.krundefined",
+                contents: result[0].content,
+                img: result[0].image,
+                user: result[0].user,
+                stu_id: result[0].stu_id
+            }];
+            res.send(data);
         });
         console.log("[GET] 알림: 인문학부 게시판의 " + id + " 게시글을 불러왔습니다.");
     } else if (table === "CampusBoard_Nature") {
         connection.query('SELECT * from CampusBoard_Nature where id = ?', [id], (error, result) => {
             if (error) throw error;
-            res.send((result))
+            const data = [{
+                title: result[0].title,
+                date: result[0].date,
+                view: "",
+                fileName: "",
+                fileLink: "https://jeiu.ac.krundefined",
+                contents: result[0].content,
+                img: result[0].image,
+                user: result[0].user,
+                stu_id: result[0].stu_id
+            }];
+            res.send(data);
         });
         console.log("[GET] 알림: 자연학부 게시판의 " + id + " 게시글을 불러왔습니다.");
     }
