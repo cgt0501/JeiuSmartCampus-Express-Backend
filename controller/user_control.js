@@ -97,6 +97,7 @@ let infoUpdate = (req, res) => {
 // 회원 사진 수정
 let photoUpdate = (req, res) => {
     const id = req.body.id;
+
     let img;
 
     //파일이 비어있을때
@@ -111,7 +112,7 @@ let photoUpdate = (req, res) => {
     connection.query('UPDATE Users SET img = ?  WHERE id = ?', [img, id], (error, result) => {
         if (error) throw error;
         res.send(result)
-    })
+    });
 };
 // 회원정보 삭제
 let userDelete = (req, res) => {
