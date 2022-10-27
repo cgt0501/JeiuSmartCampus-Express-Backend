@@ -182,41 +182,54 @@ let update = (req, res) => {
         console.log("[GET] 알림: 자연학부 게시판의 " + id + " 게시글을 수정했습니다.");
     }
 }
+// 게시글 사진 수정
 let update_img = (req, res) => {
+    console.log("요청이 들어왔습니다.");
+    const table = req.body.table;
+    const id = req.body.id;
+    let img;
+
+    //파일이 비어있을때
+    if (req.file === undefined) {
+        img = "";
+        console.log("[POST] 알림: 사용자가 게시글 사진 변경을 요청하였으나, 아무런 파일이 없었습니다.");
+    } else {
+        img = req.file['filename'];
+        console.log("[POST] 알림: 사용자가 게시글 사진을 변경하였습니다.");
+    }
 
     if (table === "CampusBoard_AI") {
-        connection.query('UPDATE CampusBoard_AI SET title = ?, content = ?  WHERE id = ?', [title, content, id], (error, result) => {
+        connection.query('UPDATE CampusBoard_AI SET image = ?  WHERE id = ?', [img, id], (error, result) => {
             if (error) throw error;
             res.send((result));
         });
         console.log("[GET] 알림: AI학부 게시판의 " + id + " 게시글의 이미지를 수정했습니다.");
     } else if (table === "CampusBoard_Art") {
-        connection.query('UPDATE CampusBoard_Art SET title = ?, content = ?  WHERE id = ?', [title, content, id], (error, result) => {
+        connection.query('UPDATE CampusBoard_Art SET image = ?  WHERE id = ?', [img, id], (error, result) => {
             if (error) throw error;
             res.send((result));
         });
         console.log("[GET] 알림: 예술학부 게시판의 " + id + " 게시글의 이미지를 수정했습니다.");
     } else if (table === "CampusBoard_Founded") {
-        connection.query('UPDATE CampusBoard_Founded SET title = ?, content = ?  WHERE id = ?', [title, content, id], (error, result) => {
+        connection.query('UPDATE CampusBoard_Founded SET image = ?  WHERE id = ?', [img, id], (error, result) => {
             if (error) throw error;
             res.send((result));
         });
         console.log("[GET] 알림: 창업학부 게시판의 " + id + " 게시글의 이미지를 수정했습니다.");
     } else if (table === "CampusBoard_Human") {
-        connection.query('UPDATE CampusBoard_Human SET title = ?, content = ?  WHERE id = ?', [title, content, id], (error, result) => {
+        connection.query('UPDATE CampusBoard_Human SET image = ?  WHERE id = ?', [img, id], (error, result) => {
             if (error) throw error;
             res.send((result));
         });
         console.log("[GET] 알림: 인문학부 게시판의 " + id + " 게시글의 이미지를 수정했습니다.");
     } else if (table === "CampusBoard_Nature") {
-        connection.query('UPDATE CampusBoard_Nature SET title = ?, content = ?  WHERE id = ?', [title, content, id], (error, result) => {
+        connection.query('UPDATE CampusBoard_Nature SET image = ?  WHERE id = ?', [img, id], (error, result) => {
             if (error) throw error;
             res.send((result));
         });
         console.log("[GET] 알림: 자연학부 게시판의 " + id + " 게시글의 이미지를 수정했습니다.");
     }
 }
-
 // 게시글 삭제
 let contents_delete = (req, res) => {
     const table = req.params.table;
