@@ -34,7 +34,7 @@ router.post('/write', community_upload.single('community_image'), community.writ
 router.get('/list/:table', community.list);
 router.get('/read/:table/:id', community.read)
 router.post('/update-content', community.update);
-router.post('/update-photo');
+router.post('/update-photo', community_upload.single('community_image'), community.update_img);
 router.get('/delete/:table/:id', community.contents_delete);
 
 module.exports = router;
