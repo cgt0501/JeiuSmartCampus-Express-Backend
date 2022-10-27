@@ -144,7 +144,42 @@ let read = (req, res) => {
 }
 // 게시글 수정
 let update = (req, res) => {
+    const table = req.body.table;
+    const id = req.body.id;
+    const title = req.body.title;
+    const content = req.body.content;
 
+    if (table === "CampusBoard_AI") {
+        connection.query('UPDATE CampusBoard_AI SET title = ?, content = ?  WHERE id = ?', [title, content, id], (error, result) => {
+            if (error) throw error;
+            res.send((result));
+        });
+        console.log("[GET] 알림: AI학부 게시판의 " + id + " 게시글을 수정했습니다.");
+    } else if (table === "CampusBoard_Art") {
+        connection.query('UPDATE CampusBoard_Art SET title = ?, content = ?  WHERE id = ?', [title, content, id], (error, result) => {
+            if (error) throw error;
+            res.send((result));
+        });
+        console.log("[GET] 알림: 예술학부 게시판의 " + id + " 게시글을 수정했습니다.");
+    } else if (table === "CampusBoard_Founded") {
+        connection.query('UPDATE CampusBoard_Founded SET title = ?, content = ?  WHERE id = ?', [title, content, id], (error, result) => {
+            if (error) throw error;
+            res.send((result));
+        });
+        console.log("[GET] 알림: 창업학부 게시판의 " + id + " 게시글을 수정했습니다.");
+    } else if (table === "CampusBoard_Human") {
+        connection.query('UPDATE CampusBoard_Human SET title = ?, content = ?  WHERE id = ?', [title, content, id], (error, result) => {
+            if (error) throw error;
+            res.send((result));
+        });
+        console.log("[GET] 알림: 인문학부 게시판의 " + id + " 게시글을 수정했습니다.");
+    } else if (table === "CampusBoard_Nature") {
+        connection.query('UPDATE CampusBoard_Nature SET title = ?, content = ?  WHERE id = ?', [title, content, id], (error, result) => {
+            if (error) throw error;
+            res.send((result));
+        });
+        console.log("[GET] 알림: 자연학부 게시판의 " + id + " 게시글을 수정했습니다.");
+    }
 }
 // 게시글 삭제
 let contents_delete = (req, res) => {
