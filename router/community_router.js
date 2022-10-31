@@ -31,8 +31,8 @@ const fileFilter = (req, file, cb) => {
 const community_upload = multer({storage: profile, fileFilter});
 
 router.post('/write', community_upload.single('community_image'), community.write);
-router.get('/list/:table', community.list);
-router.get('/read/:table/:id', community.read)
+router.get('/list/:table/:page', community.list);
+router.get('/read/:table/:id', community.read);
 router.post('/update-content', community.update);
 router.post('/update-photo', community_upload.single('community_image'), community.update_img);
 router.get('/delete/:table/:id', community.contents_delete);

@@ -63,36 +63,38 @@ let write = (req, res) => {
 // 게시글 리스트
 let list = (req, res) => {
     const table = req.params.table;
+    const page = req.params.page * 10;
+
     if (table === "CampusBoard_AI") {
-        connection.query('SELECT id, title, user, date from CampusBoard_AI order by id desc limit 10', (error, result) => {
+        connection.query('SELECT id, title, user, date from CampusBoard_AI order by id desc limit ?, 10', [page], (error, result) => {
             if (error) throw error;
             res.send((result))
         });
-        console.log("[GET] 알림: AI학부 게시판의 목록을 불러옵니다.");
+        console.log(`[GET] 알림: AI학부 게시판의 ${(page / 10) + 1}번째 목록을 불러옵니다.`);
     } else if (table === "CampusBoard_Art") {
-        connection.query('SELECT id, title, user, date from CampusBoard_Art order by id desc limit 10', (error, result) => {
+        connection.query('SELECT id, title, user, date from CampusBoard_Art order by id desc limit ?, 10', [page], (error, result) => {
             if (error) throw error;
             res.send((result))
         });
-        console.log("[GET] 알림: 예술학부 게시판의 목록을 불러옵니다.");
+        console.log(`[GET] 알림: 예술학부 게시판의 ${(page / 10) + 1}번째 목록을 불러옵니다.`);
     } else if (table === "CampusBoard_Founded") {
-        connection.query('SELECT id, title, user, date from CampusBoard_Founded order by id desc limit 10', (error, result) => {
+        connection.query('SELECT id, title, user, date from CampusBoard_Founded order by id desc limit ?, 10', [page], (error, result) => {
             if (error) throw error;
             res.send((result))
         });
-        console.log("[GET] 알림: 창업학부 게시판의 목록을 불러옵니다.");
+        console.log(`[GET] 알림: 창업학부 게시판의 ${(page / 10) + 1}번째 목록을 불러옵니다.`);
     } else if (table === "CampusBoard_Human") {
-        connection.query('SELECT id, title, user, date from CampusBoard_Human order by id desc limit 10', (error, result) => {
+        connection.query('SELECT id, title, user, date from CampusBoard_Human order by id desc limit ?, 10', [page], (error, result) => {
             if (error) throw error;
             res.send((result))
         });
-        console.log("[GET] 알림: 인문학부 게시판의 목록을 불러옵니다.");
+        console.log(`[GET] 알림: 인문학부 게시판의 ${(page / 10) + 1}번째 목록을 불러옵니다.`);
     } else if (table === "CampusBoard_Nature") {
-        connection.query('SELECT id, title, user, date from CampusBoard_Nature order by id desc limit 10', (error, result) => {
+        connection.query('SELECT id, title, user, date from CampusBoard_Nature order by id desc limit ?, 10', [page], (error, result) => {
             if (error) throw error;
             res.send((result))
         });
-        console.log("[GET] 알림: 자연학부 게시판의 목록을 불러옵니다.");
+        console.log(`[GET] 알림: 자연학부 게시판의 ${(page / 10) + 1}번째 목록을 불러옵니다.`);
     }
 }
 // 게시글 읽기
