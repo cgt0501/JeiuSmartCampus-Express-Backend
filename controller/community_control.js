@@ -60,39 +60,94 @@ let write = (req, res) => {
         });
     }
 }
+
 // 게시글 리스트
 let list = (req, res) => {
     const table = req.params.table;
     const page = req.params.page * 10;
 
+    // 탑재된 총 컨텐츠의 개수를 구한다
+    let contentRow = 0;
+    // 탑재된 총 컨텐츠의 개수를 구하여, 페이지 수를 구한다 (반올림)
+    let contentPage = 0;
+
     if (table === "CampusBoard_AI") {
+        connection.query('SELECT count(*) as totalCount from CampusBoard_AI', (error, result) => {
+            if (error) throw error;
+            contentRow = result[0]['totalCount'];
+            contentPage = Math.ceil(contentRow / 10);
+        });
         connection.query('SELECT id, title, user, date from CampusBoard_AI order by id desc limit ?, 10', [page], (error, result) => {
             if (error) throw error;
-            res.send((result))
+            result.push({
+                contentRow: contentRow,
+                contentPage: contentPage
+            });
+            res.send((result));
         });
         console.log(`[GET] 알림: AI학부 게시판의 ${(page / 10) + 1}번째 목록을 불러옵니다.`);
+
     } else if (table === "CampusBoard_Art") {
+        connection.query('SELECT count(*) as totalCount from CampusBoard_Art', (error, result) => {
+            if (error) throw error;
+            contentRow = result[0]['totalCount'];
+            contentPage = Math.ceil(contentRow / 10);
+        });
         connection.query('SELECT id, title, user, date from CampusBoard_Art order by id desc limit ?, 10', [page], (error, result) => {
             if (error) throw error;
-            res.send((result))
+            result.push({
+                contentRow: contentRow,
+                contentPage: contentPage
+            });
+            res.send((result));
         });
         console.log(`[GET] 알림: 예술학부 게시판의 ${(page / 10) + 1}번째 목록을 불러옵니다.`);
+
     } else if (table === "CampusBoard_Founded") {
+        connection.query('SELECT count(*) as totalCount from CampusBoard_Founded', (error, result) => {
+            if (error) throw error;
+            contentRow = result[0]['totalCount'];
+            contentPage = Math.ceil(contentRow / 10);
+        });
         connection.query('SELECT id, title, user, date from CampusBoard_Founded order by id desc limit ?, 10', [page], (error, result) => {
             if (error) throw error;
-            res.send((result))
+            result.push({
+                contentRow: contentRow,
+                contentPage: contentPage
+            });
+            res.send((result));
         });
         console.log(`[GET] 알림: 창업학부 게시판의 ${(page / 10) + 1}번째 목록을 불러옵니다.`);
+
     } else if (table === "CampusBoard_Human") {
+        connection.query('SELECT count(*) as totalCount from CampusBoard_Human', (error, result) => {
+            if (error) throw error;
+            contentRow = result[0]['totalCount'];
+            contentPage = Math.ceil(contentRow / 10);
+        });
         connection.query('SELECT id, title, user, date from CampusBoard_Human order by id desc limit ?, 10', [page], (error, result) => {
             if (error) throw error;
-            res.send((result))
+            result.push({
+                contentRow: contentRow,
+                contentPage: contentPage
+            });
+            res.send((result));
         });
         console.log(`[GET] 알림: 인문학부 게시판의 ${(page / 10) + 1}번째 목록을 불러옵니다.`);
+
     } else if (table === "CampusBoard_Nature") {
+        connection.query('SELECT count(*) as totalCount from CampusBoard_Nature', (error, result) => {
+            if (error) throw error;
+            contentRow = result[0]['totalCount'];
+            contentPage = Math.ceil(contentRow / 10);
+        });
         connection.query('SELECT id, title, user, date from CampusBoard_Nature order by id desc limit ?, 10', [page], (error, result) => {
             if (error) throw error;
-            res.send((result))
+            result.push({
+                contentRow: contentRow,
+                contentPage: contentPage
+            });
+            res.send((result));
         });
         console.log(`[GET] 알림: 자연학부 게시판의 ${(page / 10) + 1}번째 목록을 불러옵니다.`);
     }
