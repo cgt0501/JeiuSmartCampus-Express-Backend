@@ -19,10 +19,11 @@ let write = (req, res) => {
     const date = req.body.date;
     const content = req.body.content;
 
+    console.log(table, stu_id, title, user, date, content)
+
     let img;
     //파일이 비어있을때
     if (req.file === undefined) {
-        console.log("사진 없음");
         img = "";
     } else {
         //파일이 있을때
@@ -60,7 +61,6 @@ let write = (req, res) => {
         });
     }
 }
-
 // 게시글 리스트
 let list = (req, res) => {
     const table = req.params.table;
@@ -368,11 +368,93 @@ let contents_delete = (req, res) => {
     }
 }
 
+// 댓글 작성
+let write_comment = (req, res) => {
+    const table = req.body.table;
+    const content = req.body.content;
+    const stu_id = req.body.stu_id;
+    const user = req.body.user;
+    const page_id = req.body.page_id;
+
+    if (table === "CampusBoard_AI") {
+        connection.query('INSERT INTO CampusBoard_AI_Comment VALUES(null, ?, ?, ?, ?)', [content, stu_id, user, page_id], (error, result) => {
+            if (error) throw error;
+        });
+        connection.query('select b.id, b.content, b.stu_id, b.user from CampusBoard_AI a, CampusBoard_AI_Comment b where a.id = b.page_id and b.page_id like ? order by b.page_id desc', [page_id], (error, result) => {
+            if (error) throw error;
+            res.send((result))
+        });
+        console.log("[POST] 알림: " + table + "에 " + stu_id + " " + user + "이 댓글을 등록하였습니다.");
+    } else if (table === "CampusBoard_Art") {
+
+    } else if (table === "CampusBoard_Founded") {
+
+    } else if (table === "CampusBoard_Human") {
+
+    } else if (table === "CampusBoard_Nature") {
+
+    }
+}
+// 댓글 불러오기
+let load_comment = (req, res) => {
+    const table = req.params.table;
+    const content_id = req.params.id;
+
+    if (table === "CampusBoard_AI") {
+        connection.query('select b.id, b.content, b.stu_id, b.user from CampusBoard_AI a, CampusBoard_AI_Comment b where a.id = b.page_id and b.page_id like ? order by b.page_id desc', [content_id], (error, result) => {
+            if (error) throw error;
+            res.send((result))
+        });
+        console.log("[GET] 알림: AI학부 게시판의 " + content_id + "의 댓글을 불러왔습니다.");
+    } else if (table === "CampusBoard_Art") {
+
+    } else if (table === "CampusBoard_Founded") {
+
+    } else if (table === "CampusBoard_Human") {
+
+    } else if (table === "CampusBoard_Nature") {
+
+    }
+}
+// 댓글 수정
+let update_comment = (req, res) => {
+
+}
+// 댓글 삭제
+let delete_comment = (req, res) => {
+    const table = req.params.table;
+    const comment_id = req.params.comment_id;
+    const content_id = req.params.content_id;
+
+    if (table === "CampusBoard_AI") {
+        connection.query('DELETE FROM CampusBoard_AI_Comment WHERE id=?', [comment_id], (error, result) => {
+            if (error) throw error;
+        });
+        connection.query('select b.id, b.content, b.stu_id, b.user from CampusBoard_AI a, CampusBoard_AI_Comment b where a.id = b.page_id and b.page_id like ? order by b.page_id desc', [content_id], (error, result) => {
+            if (error) throw error;
+            res.send((result))
+        });
+        console.log("[GET] 알림: AI학부 게시판의 " + comment_id + " 댓글을 삭제했습니다.");
+    } else if (table === "CampusBoard_Art") {
+
+    } else if (table === "CampusBoard_Founded") {
+
+    } else if (table === "CampusBoard_Human") {
+
+    } else if (table === "CampusBoard_Nature") {
+
+    }
+}
+
 module.exports = {
     write: write,
     list: list,
     read: read,
     update: update,
     update_img: update_img,
-    contents_delete: contents_delete
+    contents_delete: contents_delete,
+    write_comment: write_comment,
+    load_comment: load_comment,
+    update_comment: update_comment,
+    delete_comment: delete_comment
 };
