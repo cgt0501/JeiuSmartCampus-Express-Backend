@@ -19,10 +19,11 @@ let write = (req, res) => {
     const date = req.body.date;
     const content = req.body.content;
 
+    console.log(table, stu_id, title, user, date, content)
+
     let img;
     //파일이 비어있을때
     if (req.file === undefined) {
-        console.log("사진 없음");
         img = "";
     } else {
         //파일이 있을때
